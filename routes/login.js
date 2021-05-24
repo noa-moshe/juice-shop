@@ -26,6 +26,9 @@ module.exports = function login () {
 
   return (req, res, next) => {
     verifyPreLoginChallenges(req)
+    if(req.body.email.includes("--")){
+      res.status(401).send(res.__('You\'re trying to hack!!'))
+    }else{
     models.sequelize.query(`SELECT * FROM Users WHERE email = '${req.body.email || ''}' AND password = '${insecurity.hash(req.body.password || '')}' AND deletedAt IS NULL`, { model: models.User, plain: true })
       .then((authenticatedUser) => {
         let user = utils.queryResultToJson(authenticatedUser)
@@ -54,6 +57,7 @@ module.exports = function login () {
       }).catch(error => {
         next(error)
       })
+    }
   }
 
   function verifyPreLoginChallenges (req) {
